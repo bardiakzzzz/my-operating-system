@@ -1,23 +1,54 @@
 
 #include "mouse.h"
+void printf(char*);
 
-    MouseDriver::MouseDriver(InterruptManager* manager)
-    : InterruptHandler(manager, 0x2C),  //InterruptHandler for mouse
+    MouseEventHandler::MouseEventHandler()
+    {
+    }
+
+    void MouseEventHandler::OnActivate()
+    {
+    }
+
+    void MouseEventHandler::OnMouseDown(uint8_t button)
+    {
+    }
+
+    void MouseEventHandler::OnMouseUp(uint8_t button)
+    {
+    }
+
+    void MouseEventHandler::OnMouseMove(int x, int y)
+    {
+    }
+
+
+
+
+
+    MouseDriver::MouseDriver(InterruptManager* manager, MouseEventHandler* handler)
+    : InterruptHandler(manager, 0x2C),
     dataport(0x60),
     commandport(0x64)
     {
-        uint16_t* VideoMemory = (uint16_t*)0xb8000;
+        this->handler = handler;
+    }
+
+    MouseDriver::~MouseDriver()
+    {
+    }
+
+    void MouseDriver::Activate()
+    {
         offset = 0;
         buttons = 0;
-        x = 40;
-        y = 12;
-        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
-                              | (VideoMemory[80*y+x] & 0xF000) >> 4
-                              | (VideoMemory[80*y+x] & 0x00FF);
 
-        commandport.Write(0xA8);//start interrupt
-        commandport.Write(0x20); //get current stare
-        uint8_t status = dataport.Read() | 2;  //set state of the mouse handler
+        if(handler != 0)
+            handler->OnActivate();
+
+        commandport.Write(0xA8);
+        commandport.Write(0x20); // command 0x60 = read controller command byte
+        uint8_t status = dataport.Read() | 2;
         commandport.Write(0x60); // command 0x60 = set controller command byte
         dataport.Write(status);
 
@@ -26,58 +57,38 @@
         dataport.Read();
     }
 
-    MouseDriver::~MouseDriver()
-    {
-    }
-
     uint32_t MouseDriver::HandleInterrupt(uint32_t esp)
     {
         uint8_t status = commandport.Read();
         if (!(status & 0x20))
             return esp;
 
-       static int8_t x = 40,y = 12;
-
         buffer[offset] = dataport.Read();
-        offset = (offset + 1) % 3;   //the third part is for change location
+
+        if(handler == 0)
+            return esp;
+
+        offset = (offset + 1) % 3;
 
         if(offset == 0)
         {
             if(buffer[1] != 0 || buffer[2] != 0)
             {
-                static uint16_t* VideoMemory = (uint16_t*)0xb8000;
-                VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
-                            | (VideoMemory[80*y+x] & 0xF000) >> 4
-                            | (VideoMemory[80*y+x] & 0x00FF);
-
-                x += buffer[1];
-                if(x >= 80) x = 40;            //avoid mouse to go out of screen
-                if(x < 0) x = 0;
-                y -= buffer[2];
-                if(y >= 25) y = 12;
-                if(y < 0) y = 0;
-
-                VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
-                              | (VideoMemory[80*y+x] & 0xF000) >> 4
-                              | (VideoMemory[80*y+x] & 0x00FF);
+                handler->OnMouseMove(buffer[1], -buffer[2]);
             }
 
-
-            // for(uint8_t i = 0; i < 3; i++)  //check if button was clicked
-            // {
-            //     if((buffer[0] & (0x1<<i)) != (buttons & (0x1<<i)))
-            //     {
-            // //         if(buttons & (0x1<<i))
-            // //             handler->OnMouseButtonReleased(i+1);
-            // //         else
-            // //             handler->OnMouseButtonPressed(i+1);
-            //             VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
-            //               | (VideoMemory[80*y+x] & 0xF000) >> 4
-            //               | (VideoMemory[80*y+x] & 0x00FF);
-            //     }
-            // }
-            // buttons = buffer[0];
-
+            for(uint8_t i = 0; i < 3; i++)
+            {
+                if((buffer[0] & (0x1<<i)) != (buttons & (0x1<<i)))
+                {
+                    if(buttons & (0x1<<i))
+                        handler->OnMouseUp(i+1);
+                    else
+                        handler->OnMouseDown(i+1);
+                }
+            }
+            buttons = buffer[0];
         }
+
         return esp;
     }
