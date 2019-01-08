@@ -161,7 +161,7 @@ uint32_t InterruptManager::HandleInterrupt(uint8_t interrupt, uint32_t esp)
 
 uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
 {
-    if(handlers[interrupt] != 0)  //if it has handler we call the handler 
+    if(handlers[interrupt] != 0)  //if it has handler we call the handler
     {
         esp = handlers[interrupt]->HandleInterrupt(esp);
     }

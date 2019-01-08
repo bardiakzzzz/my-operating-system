@@ -44,8 +44,8 @@ HandleException 0x11
 HandleException 0x12
 HandleException 0x13
 
-HandleInterruptRequest 0x00
-HandleInterruptRequest 0x01
+HandleInterruptRequest 0x00   #keyboard
+HandleInterruptRequest 0x01   #keyboard
 HandleInterruptRequest 0x02
 HandleInterruptRequest 0x03
 HandleInterruptRequest 0x04
@@ -56,7 +56,7 @@ HandleInterruptRequest 0x08
 HandleInterruptRequest 0x09
 HandleInterruptRequest 0x0A
 HandleInterruptRequest 0x0B
-HandleInterruptRequest 0x0C
+HandleInterruptRequest 0x0C  #mouse
 HandleInterruptRequest 0x0D
 HandleInterruptRequest 0x0E
 HandleInterruptRequest 0x0F
