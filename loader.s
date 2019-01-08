@@ -31,4 +31,3 @@ _stop:   #infinite loop for our kernel
 .section .bss
 .space 2*1024*1024; #size of stack
 kernel_stack:   #stack pointer of os
-

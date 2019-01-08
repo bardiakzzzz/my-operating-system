@@ -1,5 +1,6 @@
 #include "types.h"
 #include "gdt.h"
+#include "interrupts.h"
 void printf(char* str)
 {
     static uint16_t* VideoMemory = (uint16_t*)0xb8000; //a place to show string on screen by graphic card
@@ -9,7 +10,7 @@ void printf(char* str)
       ///  VideoMemory[i] = (VideoMemory[i] & 0xFF00) | str[i]; // 2 bytes az once to avoid overwriting to high byte
       switch(str[i])  /// use it because in perivous way we could not use printf more than one time
         {
-            case '\n':
+            case '\n':   //goes to the next line
                 x = 0;
                 y++;
                 break;
@@ -25,7 +26,7 @@ void printf(char* str)
             y++;
         }
 
-        if(y >= 25)
+        if(y >= 25) //it is not a good idea
         {
             for(y = 0; y < 25; y++)
                 for(x = 0; x < 80; x++)
@@ -55,5 +56,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t/*multiboot_
     printf("Hello World\n");
     printf("hi\n");
     GlobalDescriptorTable gdt;
+    InterruptManager interrupts(0x20, &gdt);   //IRQ_BASE = 0x20
+    interrupts.Activate();
     while(1);
 }
