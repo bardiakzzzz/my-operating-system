@@ -43,12 +43,12 @@
 
         if(offset == 0)
         {
-            // if(buffer[1] != 0 || buffer[2] != 0)
-            // {
+            if(buffer[1] != 0 || buffer[2] != 0)
+            {
                 static uint16_t* VideoMemory = (uint16_t*)0xb8000;
-                // VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
-                //             | (VideoMemory[80*y+x] & 0xF000) >> 4
-                //             | (VideoMemory[80*y+x] & 0x00FF);
+                VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
+                            | (VideoMemory[80*y+x] & 0xF000) >> 4
+                            | (VideoMemory[80*y+x] & 0x00FF);
 
                 x += buffer[1];
                 if(x >= 80) x = 40;            //avoid mouse to go out of screen
@@ -60,7 +60,7 @@
                 VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
                               | (VideoMemory[80*y+x] & 0xF000) >> 4
                               | (VideoMemory[80*y+x] & 0x00FF);
-            // }
+            }
 
 
             // for(uint8_t i = 0; i < 3; i++)  //check if button was clicked
