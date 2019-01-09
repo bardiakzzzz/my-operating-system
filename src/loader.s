@@ -1,4 +1,4 @@
-.set MAGIC, 0x1badb002   #magic numbers that show to bootloader that it is a kernel
+.set MAGIC, 0x1badb002
 .set FLAGS, (1<<0 | 1<<1)
 .set CHECKSUM, -(MAGIC + FLAGS)
 
@@ -9,7 +9,7 @@
 
 
 .section .text
-.extern kernelMain #function kernel main in kernel.cpp
+.extern kernelMain
 .extern callConstructors
 .global loader
 
@@ -22,12 +22,13 @@ loader:
     call kernelMain
 
 
-_stop:   #infinite loop for our kernel
+_stop:
     cli
     hlt
     jmp _stop
 
 
 .section .bss
-.space 2*1024*1024; #size of stack
-kernel_stack:   #stack pointer of os
+.space 2*1024*1024; # 2 MiB
+kernel_stack:
+

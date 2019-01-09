@@ -1,4 +1,7 @@
-#include "gdt.h"
+
+#include <gdt.h>
+using namespace myos;
+using namespace myos::common;
 
 
 GlobalDescriptorTable::GlobalDescriptorTable()
@@ -29,7 +32,7 @@ uint16_t GlobalDescriptorTable::CodeSegmentSelector()
 
 GlobalDescriptorTable::SegmentDescriptor::SegmentDescriptor(uint32_t base, uint32_t limit, uint8_t type)
 {
-    uint8_t* target = (uint8_t*)this;   ///gives the offset
+    uint8_t* target = (uint8_t*)this;
 
     if (limit <= 65536)
     {
@@ -49,7 +52,7 @@ GlobalDescriptorTable::SegmentDescriptor::SegmentDescriptor(uint32_t base, uint3
         // compensate this by decreasing a higher bit (and might have up to
         // 4095 wasted bytes behind the used memory)
 
-        if((limit & 0xFFF) != 0xFFF)   // increase the limit
+        if((limit & 0xFFF) != 0xFFF)
             limit = (limit >> 12)-1;
         else
             limit = limit >> 12;
@@ -60,7 +63,7 @@ GlobalDescriptorTable::SegmentDescriptor::SegmentDescriptor(uint32_t base, uint3
     // Encode the limit
     target[0] = limit & 0xFF;
     target[1] = (limit >> 8) & 0xFF;
-    target[6] |= (limit >> 16) & 0xF;  //half of the cell
+    target[6] |= (limit >> 16) & 0xF;
 
     // Encode the base
     target[2] = base & 0xFF;
@@ -97,3 +100,4 @@ uint32_t GlobalDescriptorTable::SegmentDescriptor::Limit()
 
     return result;
 }
+

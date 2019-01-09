@@ -1,8 +1,14 @@
-#include "interrupts.h"
+
+#include <hardwarecommunication/interrupts.h>
+using namespace myos::common;
+using namespace myos::hardwarecommunication;
 
 
 void printf(char* str);
 void printfHex(uint8_t);
+
+
+
 
 
 InterruptHandler::InterruptHandler(InterruptManager* interruptManager, uint8_t InterruptNumber)
@@ -22,6 +28,13 @@ uint32_t InterruptHandler::HandleInterrupt(uint32_t esp)
 {
     return esp;
 }
+
+
+
+
+
+
+
 
 
 
@@ -120,7 +133,7 @@ InterruptManager::InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescr
 
     InterruptDescriptorTablePointer idt_pointer;
     idt_pointer.size  = 256*sizeof(GateDescriptor) - 1;
-    idt_pointer.base  = (uint32_t)interruptDescriptorTable;  //load descriptor table
+    idt_pointer.base  = (uint32_t)interruptDescriptorTable;
     asm volatile("lidt %0" : : "m" (idt_pointer));
 }
 
@@ -162,17 +175,12 @@ uint32_t InterruptManager::HandleInterrupt(uint8_t interrupt, uint32_t esp)
 
 uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
 {
-    if(handlers[interrupt] != 0)  //if it has handler we call the handler
+    if(handlers[interrupt] != 0)
     {
         esp = handlers[interrupt]->HandleInterrupt(esp);
     }
     else if(interrupt != hardwareInterruptOffset)
     {
-        // char* foo = "UNHANDLED INTERRUPT 0x00";
-        // char* hex = "0123456789ABCDEF";
-        // foo[22] = hex[(interrupt >> 4) & 0xF];
-        // foo[23] = hex[interrupt & 0xF];
-        // printf(foo);
         printf("UNHANDLED INTERRUPT 0x");
         printfHex(interrupt);
     }
@@ -187,3 +195,17 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
 
     return esp;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
