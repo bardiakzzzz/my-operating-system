@@ -79,7 +79,7 @@ void PeripheralComponentInterconnectController::SelectDrivers(DriverManager* dri
                     continue;
 
 
-                for(int barNum = 0; barNum < 6; barNum++)
+                for(int barNum = 0; barNum < 6; barNum++)     // writing base address register
                 {
                     BaseAddressRegister bar = GetBaseAddressRegister(bus, device, function, barNum);
                     if(bar.address && (bar.type == InputOutput))
@@ -118,8 +118,8 @@ BaseAddressRegister PeripheralComponentInterconnectController::GetBaseAddressReg
     BaseAddressRegister result;
 
 
-    uint32_t headertype = Read(bus, device, function, 0x0E) & 0x7F;
-    int maxBARs = 6 - (4*headertype);
+    uint32_t headertype = Read(bus, device, function, 0x0E) & 0x7F;  //reading the base address just first 7 bits
+    int maxBARs = 6 - (4*headertype);  // maximum is 64 bits
     if(bar >= maxBARs)
         return result;
 
@@ -130,10 +130,10 @@ BaseAddressRegister PeripheralComponentInterconnectController::GetBaseAddressReg
 
 
 
-    if(result.type == MemoryMapping)
+    if(result.type == MemoryMapping)   // check the last bit for MemoryMapping = 0
     {
 
-        switch((bar_value >> 1) & 0x3)
+        switch((bar_value >> 1) & 0x3)   // remove 2 last bits they are flags for checking
         {
 
             case 0: // 32 Bit Mode
@@ -143,7 +143,7 @@ BaseAddressRegister PeripheralComponentInterconnectController::GetBaseAddressReg
         }
 
     }
-    else // InputOutput
+    else // for InputOutput =  1
     {
         result.address = (uint8_t*)(bar_value & ~0x3);
         result.prefetchable = false;

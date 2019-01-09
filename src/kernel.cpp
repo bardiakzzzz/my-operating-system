@@ -5,6 +5,7 @@
 #include <drivers/driver.h>
 #include <drivers/keyboard.h>
 #include <drivers/mouse.h>
+#include <drivers/vga.h>
 
 using namespace myos;
 using namespace myos::common;
@@ -146,7 +147,9 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t/*multiboot_
        drvManager.AddDriver(&mouse);
 
        PeripheralComponentInterconnectController PCIController;
-      PCIController.SelectDrivers(&drvManager, &interrupts);
+       PCIController.SelectDrivers(&drvManager, &interrupts);
+
+       VideoGraphicsArray vga;
 
 
 
@@ -155,5 +158,11 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t/*multiboot_
 
    printf("Initializing Hardware, Stage 3 : Activate interrupts\n");
     interrupts.Activate();
+
+  //  vga.SetMode(320,200,8);
+  //  for(int32_t y = 0; y < 200; y++)
+    //   for(int32_t x = 0; x < 320; x++)
+      //     vga.PutPixel(x, y, 0x00, 0x00, 0xA8);
+
     while(1);
 }
