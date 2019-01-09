@@ -9,52 +9,73 @@
 
 namespace myos
 {
-    namespace hardwarecommunication
-    {
+   namespace hardwarecommunication
+   {
 
-        class PeripheralComponentInterconnectDeviceDescriptor
-        {
-        public:
-            myos::common::uint32_t portBase;
-            myos::common::uint32_t interrupt;
-
-            myos::common::uint16_t bus;
-            myos::common::uint16_t device;
-            myos::common::uint16_t function;
-
-            myos::common::uint16_t vendor_id;   // contains bus + device + function 
-            myos::common::uint16_t device_id;
-
-            myos::common::uint8_t class_id;   //multi media
-            myos::common::uint8_t subclass_id;  //VGA & graphic card
-            myos::common::uint8_t interface_id;
-
-            myos::common::uint8_t revision;
-
-            PeripheralComponentInterconnectDeviceDescriptor();
-            ~PeripheralComponentInterconnectDeviceDescriptor();
-
-        };
+       enum BaseAddressRegisterType
+       {
+           MemoryMapping = 0,
+           InputOutput = 1
+       };
 
 
-        class PeripheralComponentInterconnectController
-        {
-            Port32Bit dataPort;     //for read & write in buses
-            Port32Bit commandPort;
 
-        public:
-            PeripheralComponentInterconnectController();
-            ~PeripheralComponentInterconnectController();
+       class BaseAddressRegister
+       {
+       public:
+           bool prefetchable;
+           myos::common::uint8_t* address;
+           myos::common::uint32_t size;
+           BaseAddressRegisterType type;
+       };
 
-            myos::common::uint32_t Read(myos::common::uint16_t bus, myos::common::uint16_t device, myos::common::uint16_t function, myos::common::uint32_t registeroffset);  //3 parts : bus , device , function   offset  :  data that is read
-            void Write(myos::common::uint16_t bus, myos::common::uint16_t device, myos::common::uint16_t function, myos::common::uint32_t registeroffset, myos::common::uint32_t value);
-            bool DeviceHasFunctions(myos::common::uint16_t bus, myos::common::uint16_t device);
 
-            void SelectDrivers(myos::drivers::DriverManager* driverManager);
-            PeripheralComponentInterconnectDeviceDescriptor GetDeviceDescriptor(myos::common::uint16_t bus, myos::common::uint16_t device, myos::common::uint16_t function);
-        };
 
-    }
+       class PeripheralComponentInterconnectDeviceDescriptor
+       {
+       public:
+           myos::common::uint32_t portBase;
+           myos::common::uint32_t interrupt;
+
+           myos::common::uint16_t bus;   // 3 bit for recognizing
+           myos::common::uint16_t device;  // 5 bit for recognizing
+           myos::common::uint16_t function;  // 3 bit for recognizing
+
+           myos::common::uint16_t vendor_id;   // show which device cpu should talk to
+           myos::common::uint16_t device_id;
+
+           myos::common::uint8_t class_id;   // multi media
+           myos::common::uint8_t subclass_id;   // VGA & Graphic card
+           myos::common::uint8_t interface_id;
+
+           myos::common::uint8_t revision;
+
+           PeripheralComponentInterconnectDeviceDescriptor();
+           ~PeripheralComponentInterconnectDeviceDescriptor();
+
+       };
+
+
+       class PeripheralComponentInterconnectController
+       {
+           Port32Bit dataPort;
+           Port32Bit commandPort;
+
+       public:
+           PeripheralComponentInterconnectController();
+           ~PeripheralComponentInterconnectController();
+
+           myos::common::uint32_t Read(myos::common::uint16_t bus, myos::common::uint16_t device, myos::common::uint16_t function, myos::common::uint32_t registeroffset);
+           void Write(myos::common::uint16_t bus, myos::common::uint16_t device, myos::common::uint16_t function, myos::common::uint32_t registeroffset, myos::common::uint32_t value);
+           bool DeviceHasFunctions(myos::common::uint16_t bus, myos::common::uint16_t device);
+
+           void SelectDrivers(myos::drivers::DriverManager* driverManager, myos::hardwarecommunication::InterruptManager* interrupts);
+           myos::drivers::Driver* GetDriver(PeripheralComponentInterconnectDeviceDescriptor dev, myos::hardwarecommunication::InterruptManager* interrupts);
+           PeripheralComponentInterconnectDeviceDescriptor GetDeviceDescriptor(myos::common::uint16_t bus, myos::common::uint16_t device, myos::common::uint16_t function);
+           BaseAddressRegister GetBaseAddressRegister(myos::common::uint16_t bus, myos::common::uint16_t device, myos::common::uint16_t function, myos::common::uint16_t bar);
+       };
+
+   }
 }
 
 #endif
